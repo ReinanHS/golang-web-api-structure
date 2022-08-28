@@ -1,5 +1,5 @@
 server:
-	go run main.go
+	go run cmd/server/main.go
 up:
 	docker compose up
 down:
