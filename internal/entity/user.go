@@ -2,13 +2,19 @@ package entity
 
 import (
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type User struct {
 	gorm.Model
-	Name     string `gorm:"type:varchar(255);NOT NULL" json:"name" binding:"required"`
-	Email    string `gorm:"type:varchar(255);NOT NULL;unique_index" json:"email" binding:"required"`
-	Password string `gorm:"type:varchar(255);NOT NULL" json:"-" binding:"required"`
-}
+	Username        string     `gorm:"type:varchar" json:"username" binding:"required"`
+	Name            string     `gorm:"type:varchar" json:"name" binding:"required"`
+	Avatar          string     `gorm:"type:varchar" json:"avatar" binding:"required"`
+	Bio             string     `gorm:"type:varchar;NULL" json:"bio"`
+	Password        string     `gorm:"type:varchar" json:"-" binding:"required"`
+	PhoneNumber     string     `gorm:"type:varchar;NULL" json:"phone_number"`
+	Email           string     `gorm:"type:varchar;unique_index" json:"email" binding:"required"`
+	EmailVerifiedAt *time.Time `gorm:"NULL" json:"email_verified_at"`
 
-type Users []User
+	Tracks []*Track `gorm:"many2many:track_user;"`
+}
