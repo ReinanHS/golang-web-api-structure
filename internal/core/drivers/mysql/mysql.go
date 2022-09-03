@@ -3,9 +3,9 @@ package mysql
 import (
 	"context"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	"github.com/reinanhs/golang-web-api-structure/internal/core/config"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
 	"sync"
 )
@@ -16,12 +16,12 @@ var (
 )
 
 func connectToDB(dbUser string, dbPassword string, dbName string) (*gorm.DB, error) {
-	var connectionString = fmt.Sprintf(
+	dsn := fmt.Sprintf(
 		"%s:%s@/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbUser, dbPassword, dbName,
 	)
 
-	return gorm.Open("mysql", connectionString)
+	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
 }
 
 func getDriver(ctx context.Context) *gorm.DB {
@@ -37,14 +37,6 @@ func getDriver(ctx context.Context) *gorm.DB {
 			// unable to connect to database
 			if err != nil {
 				log.Fatalln(err)
-			}
-
-			// ping to database
-			err = db.DB().Ping()
-
-			// error ping to database
-			if err != nil {
-				log.Panicf(err.Error())
 			}
 
 			//defer func(db *sql.DB) {

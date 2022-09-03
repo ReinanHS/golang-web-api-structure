@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/reinanhs/golang-web-api-structure/internal/core/config"
+	"github.com/reinanhs/golang-web-api-structure/internal/core/drivers"
 	"github.com/reinanhs/golang-web-api-structure/internal/core/http"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -87,4 +89,13 @@ func (app App) GetContext() context.Context {
 
 func (app App) Run() {
 	app.GetContext().Value("server").(*http.Server).Run()
+}
+
+func (app App) RunMigration() {
+	db := app.GetContext().Value("db").(*gorm.DB)
+
+	err := drivers.RunMigration(db)
+	if err != nil {
+		panic(fmt.Sprintf("There was an error running migrations: %s", err))
+	}
 }

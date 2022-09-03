@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/reinanhs/golang-web-api-structure/internal/http/controller/user"
+	"github.com/reinanhs/golang-web-api-structure/internal/http/controller"
 )
 
 func AddRoutes(ctx context.Context, router *gin.Engine) *gin.Engine {
@@ -12,7 +12,7 @@ func AddRoutes(ctx context.Context, router *gin.Engine) *gin.Engine {
 	{
 		prod := main.Group("user")
 		{
-			prod.GET("/", user.NewUserController(ctx).Index)
+			prod.GET("/", controller.NewUserController(ctx).Index)
 		}
 	}
 

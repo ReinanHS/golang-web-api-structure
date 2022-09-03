@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"github.com/jinzhu/gorm"
 	"github.com/reinanhs/golang-web-api-structure/internal/entity"
+	"gorm.io/gorm"
 )
 
 //UserRepository is contract what userRepository can do to db

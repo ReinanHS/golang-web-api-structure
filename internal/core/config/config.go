@@ -1,8 +1,6 @@
 package config
 
 import (
-	"context"
-	"fmt"
 	"github.com/spf13/viper"
 	"log"
 	"sync"
@@ -14,9 +12,10 @@ type AppConfig struct {
 	AppPort  string `mapstructure:"APP_PORT"`
 	AppDebug string `mapstructure:"APP_DEBUG"`
 
-	DBDatabase string `mapstructure:"DB_DATABASE"`
-	DBUsername string `mapstructure:"DB_USERNAME"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
+	DBConnection string `mapstructure:"DB_CONNECTION"`
+	DBDatabase   string `mapstructure:"DB_DATABASE"`
+	DBUsername   string `mapstructure:"DB_USERNAME"`
+	DBPassword   string `mapstructure:"DB_PASSWORD"`
 }
 
 var lock = &sync.Mutex{}
@@ -41,13 +40,13 @@ func loadConfig(path string) (config AppConfig, err error) {
 	return
 }
 
-func GetConfig(ctx context.Context) *AppConfig {
+func GetConfig() *AppConfig {
 
 	if configInstance == nil {
 		lock.Lock()
 		defer lock.Unlock()
 		if configInstance == nil {
-			fmt.Println("Creating AppConfig single instance now.")
+			log.Println("Creating AppConfig single instance now.")
 			configData, err := loadConfig(".")
 
 			if err != nil {
@@ -56,10 +55,10 @@ func GetConfig(ctx context.Context) *AppConfig {
 
 			configInstance = &configData
 		} else {
-			fmt.Println("Single AppConfig instance already created.")
+			log.Println("Single AppConfig instance already created.")
 		}
 	} else {
-		fmt.Println("Single AppConfig instance already created.")
+		log.Println("Single AppConfig instance already created.")
 	}
 
 	return configInstance

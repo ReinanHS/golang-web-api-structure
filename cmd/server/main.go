@@ -10,10 +10,7 @@ func main() {
 	ctx := context.Background()
 	ctx = app.GetContainer(ctx)
 
-	//ctx = context.WithValue(ctx, "config", config.GetConfig(ctx))
-	//ctx = context.WithValue(ctx, "server", http.New(ctx))
-	//ctx = context.WithValue(ctx, "db", mysql.New(ctx))
-
 	appInstance := app.GetApp(ctx)
+	appInstance.RunMigration()
 	appInstance.Run()
 }
