@@ -9,6 +9,9 @@ import (
 //UserRepository is contract what userRepository can do to db
 type UserRepository interface {
 	All() []entity.User
+	EmailIsInUsed(email string) bool
+	UsernameIsInUsed(username string) bool
+	Store(*entity.User) error
 }
 
 type userConnection struct {
@@ -36,4 +39,23 @@ func (r *userConnection) All() []entity.User {
 	}).Find(&users)
 
 	return users
+}
+
+func (r *userConnection) EmailIsInUsed(email string) bool {
+	var count int64
+	r.connection.Model(&entity.User{}).Where(&entity.User{Email: email}).Count(&count)
+
+	return count != 0
+}
+
+func (r *userConnection) UsernameIsInUsed(username string) bool {
+	var count int64
+	r.connection.Model(&entity.User{}).Where(&entity.User{Username: username}).Count(&count)
+
+	return count != 0
+}
+
+func (r *userConnection) Store(u *entity.User) error {
+	result := r.connection.Create(u)
+	return result.Error
 }

@@ -6,10 +6,10 @@ import (
 )
 
 type RegisterDto struct {
-	Username  string `json:"username" form:"username" validate:"required"`
-	Name      string `json:"name" form:"name" validate:"required"`
-	Password  string `json:"password" form:"password" validate:"required"`
-	CPassword string `json:"c_password" form:"c_password" validate:"required"`
+	Username  string `json:"username" form:"username" validate:"required,min=4,max=60"`
+	Name      string `json:"name" form:"name" validate:"required,min=4,max=90"`
+	Password  string `json:"password" form:"password" validate:"required,min=8"`
+	CPassword string `json:"c_password" form:"c_password" validate:"required,min=8,eqfield=Password"`
 	Email     string `json:"email" form:"email" validate:"required,email"`
 }
 
