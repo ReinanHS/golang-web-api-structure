@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/reinanhs/golang-web-api-structure/internal/dto"
 	"github.com/reinanhs/golang-web-api-structure/internal/repository"
-	"net/http"
 )
 
 //RegisteredUserController is a ....
@@ -38,11 +37,7 @@ func (c registeredUserController) Store(context *gin.Context) {
 	params := dto.RegisterDto{}
 
 	if data, err := params.BindingValidParams(context); err != nil {
-		context.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
-			"data":    data,
-			"message": err.Error(),
-			"status":  http.StatusUnprocessableEntity,
-		})
+		context.AbortWithStatusJSON(data.Code, data)
 		return
 	}
 

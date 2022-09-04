@@ -13,6 +13,6 @@ type RegisterDto struct {
 	Email     string `json:"email" form:"email" validate:"required,email"`
 }
 
-func (params *RegisterDto) BindingValidParams(c *gin.Context) (map[string]interface{}, error) {
+func (params *RegisterDto) BindingValidParams(c *gin.Context) (request.ResponseErrorDto, error) {
 	return request.DefaultGetValidParams(c, params)
 }

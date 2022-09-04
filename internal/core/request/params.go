@@ -5,22 +5,32 @@ import (
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"net/http"
 )
 
-func DefaultGetValidParams(c *gin.Context, params interface{}) (map[string]interface{}, error) {
-	errorData := map[string]interface{}{}
+func makeErrorResponse(msg string, code int) (ResponseErrorDto, error) {
+	err := errors.New(msg)
+	return ResponseErrorDto{
+		ResponseDTO: ResponseDTO{
+			Message: err.Error(),
+			Code:    code,
+		},
+	}, err
+}
+
+func DefaultGetValidParams(c *gin.Context, params interface{}) (ResponseErrorDto, error) {
 	if err := c.ShouldBind(params); err != nil {
-		return errorData, err
+		return makeErrorResponse(err.Error(), http.StatusBadRequest)
 	}
 
 	valid, err := GetValidator(c)
 	if err != nil {
-		return errorData, err
+		return makeErrorResponse(err.Error(), http.StatusInternalServerError)
 	}
 
 	trans, err := GetTranslation(c)
 	if err != nil {
-		return errorData, err
+		return makeErrorResponse(err.Error(), http.StatusInternalServerError)
 	}
 
 	err = valid.Struct(params)
@@ -29,10 +39,10 @@ func DefaultGetValidParams(c *gin.Context, params interface{}) (map[string]inter
 		return HandleValidation(errs, trans)
 	}
 
-	return errorData, nil
+	return ResponseErrorDto{}, nil
 }
 
-func HandleValidation(errs validator.ValidationErrors, trans ut.Translator) (map[string]interface{}, error) {
+func HandleValidation(errs validator.ValidationErrors, trans ut.Translator) (ResponseErrorDto, error) {
 	errorData := map[string]interface{}{}
 
 	for _, e := range errs {
@@ -41,8 +51,7 @@ func HandleValidation(errs validator.ValidationErrors, trans ut.Translator) (map
 			continue
 		}
 
-		var localData = []string{}
-
+		var localData []string
 		for _, e2 := range errs {
 			if e.Namespace() == e2.Namespace() {
 				localData = append(localData, e2.Translate(trans))
@@ -52,7 +61,17 @@ func HandleValidation(errs validator.ValidationErrors, trans ut.Translator) (map
 		errorData[e.Field()] = localData
 	}
 
-	return errorData, errors.New("there was a validation error")
+	text, _ := trans.T("UnprocessableEntity")
+	err := errors.New(text)
+	responseErrorDto := ResponseErrorDto{
+		ResponseDTO: ResponseDTO{
+			Message: err.Error(),
+			Code:    http.StatusUnprocessableEntity,
+		},
+		Errors: errorData,
+	}
+
+	return responseErrorDto, err
 }
 
 func GetValidator(c *gin.Context) (*validator.Validate, error) {

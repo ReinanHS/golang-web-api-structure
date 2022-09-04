@@ -24,16 +24,20 @@ func TranslationMiddleware() gin.HandlerFunc {
 
 		switch locale {
 		case "en":
+			_ = trans.Add("UnprocessableEntity", "validation errors in your request", true)
 			err := en_translations.RegisterDefaultTranslations(val, trans)
 			if err != nil {
 				log.Fatal(err)
 			}
+
 			break
 		default:
+			_ = trans.Add("UnprocessableEntity", "erros de validação em sua solicitação", true)
 			err := pt_BR_translations.RegisterDefaultTranslations(val, trans)
 			if err != nil {
 				log.Fatal(err)
 			}
+
 			break
 		}
 		c.Set("TranslatorKey", trans)
