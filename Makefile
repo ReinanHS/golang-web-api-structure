@@ -8,3 +8,7 @@ mysql:
 	docker exec -it golang-web-api-mysql mysql -u admin -p"root" database
 artisan:
 	@go run cmd/tools/artisan.go
+swag:
+	swag init --parseInternal -g cmd\server\main.go
+tidy:
+	go mod tidy

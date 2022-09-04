@@ -1,0 +1,51 @@
+basePath: /api/v1
+definitions:
+  dto.RegisterDto:
+    properties:
+      c_password:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - c_password
+    - email
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A sample API project with golang
+  title: Golang web api structure
+  version: "1.0"
+paths:
+  /guest/register:
+    post:
+      consumes:
+      - application/json
+      description: You will be able to create a user using this route
+      parameters:
+      - description: User JSON
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Registration of a new user
+      tags:
+      - Auth
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

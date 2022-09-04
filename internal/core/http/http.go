@@ -4,7 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/reinanhs/golang-web-api-structure/internal/core/config"
-	router "github.com/reinanhs/golang-web-api-structure/internal/http/config"
+	"github.com/reinanhs/golang-web-api-structure/internal/http/middleware"
+	"github.com/reinanhs/golang-web-api-structure/internal/router"
 	"log"
 )
 
@@ -37,7 +38,10 @@ func New(ctx context.Context) *Server {
 
 // Run the server
 func (s *Server) Run() {
-	router.AddRoutes(s.ctx, s.server)
+	s.server.Use(middleware.HandleCORS(s.server))
+	s.server.Use(middleware.TranslationMiddleware())
+
+	router.InitRouter(s.ctx, s.server)
 
 	log.Printf("Server running at port: %v", s.port)
 	log.Printf("Link: %s:%v", s.host, s.port)
