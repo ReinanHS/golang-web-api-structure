@@ -19,8 +19,8 @@ type authSessionConnection struct {
 	ctx        context.Context
 }
 
-//NewAuthSession is creates a new instance of AuthSessionRepository
-func NewAuthSession(ctx context.Context) AuthSessionRepository {
+//NewAuthSessionRepository is creates a new instance of AuthSessionRepository
+func NewAuthSessionRepository(ctx context.Context) AuthSessionRepository {
 	return &authSessionConnection{
 		connection: ctx.Value("db").(*gorm.DB),
 		ctx:        ctx,
