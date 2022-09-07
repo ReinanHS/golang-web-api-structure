@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-//RegisteredUserController is a ....
+//RegisteredUserController is a responsible to handle an incoming registration request.
 type RegisteredUserController interface {
 	Store(context *gin.Context)
 }
@@ -33,10 +33,10 @@ func NewRegisteredUserController(ctx context.Context) RegisteredUserController {
 // @Summary     Registration of a new user
 // @Param       user body dto.RegisterDto true "User JSON"
 // @Description You will be able to create a user using this route
-// @Tags        Auth
+// @Tags        Attempt
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} Helloworld
+// @Success     200 {object} entity.User
 // @Router      /guest/register [post]
 func (c registeredUserController) Store(context *gin.Context) {
 	params := dto.RegisterDto{}
@@ -56,7 +56,7 @@ func (c registeredUserController) Store(context *gin.Context) {
 		return
 	}
 
-	context.JSON(200, gin.H{
+	context.JSON(http.StatusCreated, gin.H{
 		"data": data,
 	})
 }

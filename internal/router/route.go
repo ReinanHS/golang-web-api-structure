@@ -16,6 +16,7 @@ func InitRouter(ctx context.Context, router *gin.Engine) *gin.Engine {
 		prod := main.Group("guest")
 		{
 			prod.POST("/register", controller.NewRegisteredUserController(ctx).Store)
+			prod.POST("/login", controller.NewAuthenticatedSessionController(ctx).Store)
 		}
 	}
 

@@ -12,6 +12,7 @@ type UserRepository interface {
 	EmailIsInUsed(email string) bool
 	UsernameIsInUsed(username string) bool
 	Store(*entity.User) error
+	RetrieveByCredentials(username string) *entity.User
 }
 
 type userConnection struct {
@@ -58,4 +59,14 @@ func (r *userConnection) UsernameIsInUsed(username string) bool {
 func (r *userConnection) Store(u *entity.User) error {
 	result := r.connection.Create(u)
 	return result.Error
+}
+
+func (r *userConnection) RetrieveByCredentials(username string) *entity.User {
+	var user entity.User
+	r.connection.
+		Select([]string{"password", "username", "id"}).
+		Where(&entity.User{Username: username}).
+		First(&user)
+
+	return &user
 }

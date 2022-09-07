@@ -1,12 +1,11 @@
 package entity
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
 )
 
 type User struct {
-	gorm.Model
+	Model
 	Username        string     `gorm:"type:varchar" json:"username" binding:"required"`
 	Name            string     `gorm:"type:varchar" json:"name" binding:"required"`
 	Avatar          string     `gorm:"type:varchar" json:"avatar" binding:"required"`

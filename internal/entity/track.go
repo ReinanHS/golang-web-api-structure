@@ -1,9 +1,7 @@
 package entity
 
-import "gorm.io/gorm"
-
 type Track struct {
-	gorm.Model
+	Model
 	Name   string `json:"name" binding:"required"`
 	Config string `json:"config" binding:"required" gorm:"type:text;NOT NULL"`
 

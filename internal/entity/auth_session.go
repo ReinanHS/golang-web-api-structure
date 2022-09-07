@@ -1,10 +1,8 @@
 package entity
 
-import "gorm.io/gorm"
-
 type AuthSession struct {
-	gorm.Model
-	UserId       int    `json:"user_id" binding:"required"`
+	Model
+	UserId       uint   `json:"user_id" binding:"required"`
 	User         User   `json:"user"`
 	Location     string `json:"location" binding:"required"`
 	Latitude     string `json:"latitude" binding:"required"`
@@ -14,4 +12,5 @@ type AuthSession struct {
 	IpAddress    string `json:"ip_address" binding:"required"`
 	DeviceId     string `json:"device_id" gorm:"type:varchar;NULL"`
 	DeviceIdUuid string `json:"device_id_uuid" gorm:"type:varchar;NULL"`
+	IsActive     bool   `json:"is_active" gorm:"default:false"`
 }

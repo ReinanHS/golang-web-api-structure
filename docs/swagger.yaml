@@ -1,20 +1,94 @@
 basePath: /api/v1
 definitions:
+  dto.LoginDto:
+    properties:
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 60
+        minLength: 4
+        type: string
+    required:
+    - password
+    - username
+    type: object
   dto.RegisterDto:
     properties:
       c_password:
+        minLength: 8
         type: string
       email:
         type: string
       name:
+        maxLength: 90
+        minLength: 4
         type: string
       password:
+        minLength: 8
         type: string
       username:
+        maxLength: 60
+        minLength: 4
         type: string
     required:
     - c_password
     - email
+    - name
+    - password
+    - username
+    type: object
+  entity.Track:
+    properties:
+      config:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/entity.User'
+        type: array
+    required:
+    - config
+    - name
+    type: object
+  entity.User:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      email_verified_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone_number:
+        type: string
+      tracks:
+        items:
+          $ref: '#/definitions/entity.Track'
+        type: array
+      updated_at:
+        type: string
+      username:
+        type: string
+    required:
+    - avatar
+    - email
+    - name
+    - username
     type: object
 host: localhost:8080
 info:
@@ -23,6 +97,28 @@ info:
   title: Golang web api structure
   version: "1.0"
 paths:
+  /guest/login:
+    post:
+      consumes:
+      - application/json
+      description: You will be able to create a user using this route
+      parameters:
+      - description: User JSON
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Perform user authentication
+      tags:
+      - Auth
   /guest/register:
     post:
       consumes:
@@ -41,7 +137,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/entity.User'
       summary: Registration of a new user
       tags:
       - Auth

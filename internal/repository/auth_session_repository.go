@@ -11,6 +11,7 @@ type AuthSessionRepository interface {
 	Create(*entity.AuthSession) (*entity.AuthSession, error)
 	Delete(*entity.AuthSession)
 	GetAuthSessionById(id int) (*entity.AuthSession, error)
+	GetAuthSessionByDeviceId(userId uint, deviceId string) (*entity.AuthSession, error)
 	GetAll() []entity.AuthSession
 }
 
@@ -44,6 +45,15 @@ func (c authSessionConnection) GetAuthSessionById(id int) (*entity.AuthSession, 
 	var authSession = entity.AuthSession{}
 
 	result := c.connection.First(&authSession, "id = ?", id)
+	return &authSession, result.Error
+}
+
+func (c authSessionConnection) GetAuthSessionByDeviceId(userId uint, deviceId string) (*entity.AuthSession, error) {
+	var authSession = entity.AuthSession{}
+
+	result := c.connection.
+		Where(&entity.AuthSession{UserId: userId, DeviceId: deviceId}).
+		First(&authSession)
 	return &authSession, result.Error
 }
 
