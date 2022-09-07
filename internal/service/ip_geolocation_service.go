@@ -11,9 +11,11 @@ import (
 	"net/http"
 )
 
-var apiURL = "http://ip-api.com/json"
+const ApiURL = "http://ip-api.com/json"
 
-type ipApiDto struct {
+var errorBadRequest = "não foi possivel consultar o IP"
+
+type IPGeolocationDto struct {
 	Status      string      `json:"status"`
 	Country     string      `json:"country"`
 	CountryCode string      `json:"countryCode"`
@@ -29,23 +31,23 @@ type ipApiDto struct {
 	As          string      `json:"as"`
 }
 
-type IpApiService interface {
-	GetInfoByIP(ip string) (ipApiDto, error)
+type IPGeolocationService interface {
+	GetInfoByIP(ip string) (IPGeolocationDto, error)
 }
 
-type ipApiService struct {
+type ipGeolocationService struct {
 	ctx context.Context
 }
 
-//NewIpApiService is creates a new instance of IpApiService
-func NewIpApiService(ctx context.Context) IpApiService {
-	return &ipApiService{
+//NewIPGeolocationService is creates a new instance of IPGeolocationService
+func NewIPGeolocationService(ctx context.Context) IPGeolocationService {
+	return &ipGeolocationService{
 		ctx: ctx,
 	}
 }
 
-func (s *ipApiService) GetInfoByIP(ip string) (ipApiDto, error) {
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s", apiURL, ip), nil)
+func (s *ipGeolocationService) GetInfoByIP(ip string) (IPGeolocationDto, error) {
+	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s", ApiURL, ip), nil)
 	res, _ := http.DefaultClient.Do(req)
 
 	defer func(Body io.ReadCloser) {
@@ -56,17 +58,17 @@ func (s *ipApiService) GetInfoByIP(ip string) (ipApiDto, error) {
 	}(res.Body)
 
 	if res.StatusCode != http.StatusOK {
-		return ipApiDto{}, errors.New("não foi possivel consultar o IP")
+		return IPGeolocationDto{}, errors.New(errorBadRequest)
 	}
 
 	body, _ := ioutil.ReadAll(res.Body)
 
 	bodyData := string(body)
-	dataJSON := ipApiDto{}
+	dataJSON := IPGeolocationDto{}
 	err := json.Unmarshal([]byte(bodyData), &dataJSON)
 
 	if err != nil {
-		return ipApiDto{}, err
+		return IPGeolocationDto{}, err
 	}
 
 	return dataJSON, nil

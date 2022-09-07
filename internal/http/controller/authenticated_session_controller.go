@@ -45,7 +45,7 @@ func (c authenticatedSessionController) Store(context *gin.Context) {
 		return
 	}
 
-	attempt, err := c.authService.Attempt(params)
+	user, err := c.authService.Attempt(params)
 	if err != nil {
 		request.ResponseDTO{
 			Message: err.Error(),
@@ -54,26 +54,17 @@ func (c authenticatedSessionController) Store(context *gin.Context) {
 		return
 	}
 
-	session, err := c.authService.GetAuthSession(context, attempt)
+	_, err = c.authService.CheckSession(context, user)
 	if err != nil {
 		request.ResponseDTO{
 			Message: err.Error(),
-			Code:    http.StatusInternalServerError,
-		}.Abort(context)
-		return
-	}
-
-	_, err = c.authService.AttemptSession(session)
-	if err != nil {
-		request.ResponseDTO{
-			Message: err.Error(),
-			Code:    http.StatusInternalServerError,
+			Code:    http.StatusBadRequest,
 		}.Abort(context)
 		return
 	}
 
 	context.JSON(http.StatusCreated, gin.H{
-		"data": session,
+		"data": "",
 		"ip":   context.ClientIP(),
 	})
 }

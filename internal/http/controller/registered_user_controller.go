@@ -48,11 +48,10 @@ func (c registeredUserController) Store(context *gin.Context) {
 
 	data, err := c.userService.Store(params)
 	if err != nil {
-		code := http.StatusBadRequest
-		context.AbortWithStatusJSON(code, request.ResponseDTO{
+		request.ResponseDTO{
 			Message: err.Error(),
-			Code:    code,
-		})
+			Code:    http.StatusBadRequest,
+		}.Abort(context)
 		return
 	}
 

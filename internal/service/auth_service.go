@@ -11,13 +11,18 @@ import (
 	"github.com/reinanhs/golang-web-api-structure/internal/entity"
 	"github.com/reinanhs/golang-web-api-structure/internal/helper"
 	"github.com/reinanhs/golang-web-api-structure/internal/repository"
+	"log"
 )
 
-var errorInvalidCredentials = "Credenciais Invalidas"
+var (
+	errorInvalidCredentials = "credenciais Invalidas"
+	errorInvalidSession     = "este dispositivo não está autorizado"
+)
 
 type AuthService interface {
 	Attempt(dto dto.LoginDto) (*entity.User, error)
 	AttemptSession(authSession *entity.AuthSession) (bool, error)
+	CheckSession(context *gin.Context, user *entity.User) (bool, error)
 	GetAuthSession(context *gin.Context, user *entity.User) (*entity.AuthSession, error)
 }
 
@@ -37,30 +42,23 @@ func NewAuthService(ctx context.Context) AuthService {
 
 func (s *authService) Attempt(dto dto.LoginDto) (*entity.User, error) {
 	user := s.repoUser.RetrieveByCredentials(dto.Username)
-	if len(user.Username) == 0 {
-		return s.failedAuth()
-	}
-
 	hash, _ := helper.ComparePasswordAndHash(dto.Password, user.Password)
 	if !hash {
-		return s.failedAuth()
+		return nil, errors.New(errorInvalidCredentials)
 	}
 
 	return user, nil
-}
-
-func (s *authService) failedAuth() (*entity.User, error) {
-	return nil, errors.New(fmt.Sprint(errorInvalidCredentials))
 }
 
 func (s *authService) GetAuthSession(context *gin.Context, user *entity.User) (*entity.AuthSession, error) {
 	uag := context.GetHeader("User-Agent")
 	ua := useragent.Parse(uag)
 
-	ipAddress := "177.11.159.182" // context.ClientIP()
+	ipAddress := "24.48.0.1" // context.ClientIP()
 
-	dataResult, err := NewIpApiService(context).GetInfoByIP(ipAddress)
+	dataResult, err := NewIPGeolocationService(context).GetInfoByIP(ipAddress)
 	if err != nil {
+		log.Fatal(err)
 		return nil, err
 	}
 
@@ -94,8 +92,15 @@ func (s *authService) AttemptSession(authSession *entity.AuthSession) (bool, err
 	}
 
 	if !session.IsActive {
-		return false, errors.New("seu dispositivo não está autenticado, você deve habilitar este dispositivo no painel de controle em uma conta previamente autenticada")
+		return false, errors.New(errorInvalidSession)
 	}
 
 	return true, nil
+}
+
+func (s *authService) CheckSession(context *gin.Context, user *entity.User) (bool, error) {
+	session, _ := s.GetAuthSession(context, user)
+	result, err := s.AttemptSession(session)
+
+	return result, err
 }
