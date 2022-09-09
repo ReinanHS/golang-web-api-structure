@@ -45,7 +45,7 @@ func (c authenticatedSessionController) Store(context *gin.Context) {
 		return
 	}
 
-	user, err := c.authService.Attempt(params)
+	authToken, err := c.authService.Auth(context, params)
 	if err != nil {
 		request.ResponseDTO{
 			Message: err.Error(),
@@ -54,17 +54,8 @@ func (c authenticatedSessionController) Store(context *gin.Context) {
 		return
 	}
 
-	_, err = c.authService.CheckSession(context, user)
-	if err != nil {
-		request.ResponseDTO{
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		}.Abort(context)
-		return
-	}
-
-	context.JSON(http.StatusCreated, gin.H{
-		"data": "",
+	context.JSON(http.StatusOK, gin.H{
+		"data": authToken,
 		"ip":   context.ClientIP(),
 	})
 }

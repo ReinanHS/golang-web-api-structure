@@ -10,22 +10,29 @@ import (
 	"net/http"
 )
 
+var logUserCreated = "usuário criado com sucesso"
+
 //RegisteredUserController is a responsible to handle an incoming registration request.
 type RegisteredUserController interface {
 	Store(context *gin.Context)
 }
 
 type registeredUserController struct {
-	userRepository repository.UserRepository
-	userService    service.UserService
-	ctx            context.Context
+	userRepo        repository.UserRepository
+	authSessionRepo repository.AuthSessionRepository
+	userService     service.UserService
+	authService     service.AuthService
+	ctx             context.Context
 }
 
 //NewRegisteredUserController is creating anew instance of RegisteredUserController
 func NewRegisteredUserController(ctx context.Context) RegisteredUserController {
 	return &registeredUserController{
-		userRepository: repository.NewUserRepository(ctx),
-		userService:    service.NewUserService(ctx),
+		userRepo:        repository.NewUserRepository(ctx),
+		authSessionRepo: repository.NewAuthSessionRepository(ctx),
+		userService:     service.NewUserService(ctx),
+		authService:     service.NewAuthService(ctx),
+		ctx:             ctx,
 	}
 }
 
@@ -46,7 +53,7 @@ func (c registeredUserController) Store(context *gin.Context) {
 		return
 	}
 
-	data, err := c.userService.Store(params)
+	user, err := c.userService.Store(params)
 	if err != nil {
 		request.ResponseDTO{
 			Message: err.Error(),
@@ -55,7 +62,30 @@ func (c registeredUserController) Store(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusCreated, gin.H{
-		"data": data,
+	authSession, err := c.authService.GetAuthSession(context, &user)
+	if err != nil {
+		request.ResponseDTO{
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
+		}.Abort(context)
+		return
+	}
+
+	_, err = c.authSessionRepo.Create(authSession)
+	if err != nil {
+		request.ResponseDTO{
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
+		}.Abort(context)
+		return
+	}
+
+	code := http.StatusCreated
+	context.JSON(code, request.ResponseDataDto{
+		ResponseDTO: request.ResponseDTO{
+			Message: logUserCreated,
+			Code:    code,
+		},
+		Data: user,
 	})
 }

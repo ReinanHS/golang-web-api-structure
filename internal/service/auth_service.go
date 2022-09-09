@@ -11,7 +11,6 @@ import (
 	"github.com/reinanhs/golang-web-api-structure/internal/entity"
 	"github.com/reinanhs/golang-web-api-structure/internal/helper"
 	"github.com/reinanhs/golang-web-api-structure/internal/repository"
-	"log"
 )
 
 var (
@@ -24,11 +23,13 @@ type AuthService interface {
 	AttemptSession(authSession *entity.AuthSession) (bool, error)
 	CheckSession(context *gin.Context, user *entity.User) (bool, error)
 	GetAuthSession(context *gin.Context, user *entity.User) (*entity.AuthSession, error)
+	Auth(context *gin.Context, dto dto.LoginDto) (*entity.AuthAccessToken, error)
 }
 
 type authService struct {
 	repoUser        repository.UserRepository
 	repoAuthSession repository.AuthSessionRepository
+	repoAuthFailed  repository.AuthFailedRepository
 	ctx             context.Context
 }
 
@@ -36,15 +37,41 @@ func NewAuthService(ctx context.Context) AuthService {
 	return &authService{
 		repoUser:        repository.NewUserRepository(ctx),
 		repoAuthSession: repository.NewAuthSessionRepository(ctx),
+		repoAuthFailed:  repository.NewAuthFailedRepository(ctx),
 		ctx:             ctx,
 	}
+}
+
+func (s *authService) Auth(context *gin.Context, dto dto.LoginDto) (*entity.AuthAccessToken, error) {
+	authToken := &entity.AuthAccessToken{}
+
+	user, err := s.Attempt(dto)
+	if err != nil {
+		session, _ := s.GetAuthSession(context, user)
+		failed := &entity.AuthFailed{
+			UserId:    user.ID,
+			Device:    session.Device,
+			UserAgent: session.UserAgent,
+			IpAddress: session.IpAddress,
+		}
+
+		_ = s.repoAuthFailed.Create(failed)
+		return authToken, err
+	}
+
+	_, err = s.CheckSession(context, user)
+	if err != nil {
+		return authToken, err
+	}
+
+	return authToken, nil
 }
 
 func (s *authService) Attempt(dto dto.LoginDto) (*entity.User, error) {
 	user := s.repoUser.RetrieveByCredentials(dto.Username)
 	hash, _ := helper.ComparePasswordAndHash(dto.Password, user.Password)
 	if !hash {
-		return nil, errors.New(errorInvalidCredentials)
+		return user, errors.New(errorInvalidCredentials)
 	}
 
 	return user, nil
@@ -58,7 +85,6 @@ func (s *authService) GetAuthSession(context *gin.Context, user *entity.User) (*
 
 	dataResult, err := NewIPGeolocationService(context).GetInfoByIP(ipAddress)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 
