@@ -23,13 +23,15 @@ type AuthService interface {
 	AttemptSession(authSession *entity.AuthSession) (bool, error)
 	CheckSession(context *gin.Context, user *entity.User) (bool, error)
 	GetAuthSession(context *gin.Context, user *entity.User) (*entity.AuthSession, error)
-	Auth(context *gin.Context, dto dto.LoginDto) (*entity.AuthAccessToken, error)
+	Auth(context *gin.Context, dto dto.LoginDto) (*dto.AuthDto, error)
 }
 
 type authService struct {
 	repoUser        repository.UserRepository
 	repoAuthSession repository.AuthSessionRepository
 	repoAuthFailed  repository.AuthFailedRepository
+	repoAccessToken repository.AuthAccessTokenRepository
+	jwtService      JWTService
 	ctx             context.Context
 }
 
@@ -38,14 +40,14 @@ func NewAuthService(ctx context.Context) AuthService {
 		repoUser:        repository.NewUserRepository(ctx),
 		repoAuthSession: repository.NewAuthSessionRepository(ctx),
 		repoAuthFailed:  repository.NewAuthFailedRepository(ctx),
+		repoAccessToken: repository.NewAuthAccessTokenRepository(ctx),
+		jwtService:      NewJWTService(ctx),
 		ctx:             ctx,
 	}
 }
 
-func (s *authService) Auth(context *gin.Context, dto dto.LoginDto) (*entity.AuthAccessToken, error) {
-	authToken := &entity.AuthAccessToken{}
-
-	user, err := s.Attempt(dto)
+func (s *authService) Auth(context *gin.Context, dtoLogin dto.LoginDto) (*dto.AuthDto, error) {
+	user, err := s.Attempt(dtoLogin)
 	if err != nil {
 		session, _ := s.GetAuthSession(context, user)
 		failed := &entity.AuthFailed{
@@ -56,15 +58,35 @@ func (s *authService) Auth(context *gin.Context, dto dto.LoginDto) (*entity.Auth
 		}
 
 		_ = s.repoAuthFailed.Create(failed)
-		return authToken, err
+		return nil, err
 	}
 
 	_, err = s.CheckSession(context, user)
 	if err != nil {
-		return authToken, err
+		return nil, err
 	}
 
-	return authToken, nil
+	session, _ := s.GetAuthSession(context, user)
+	sessionDB, err := s.repoAuthSession.GetAuthSessionByDeviceId(session.UserId, session.DeviceId)
+	token, err := s.jwtService.GenerateToken(sessionDB.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	authToken := &entity.AuthAccessToken{
+		AuthSessionId: sessionDB.ID,
+		IsRevoked:     false,
+		Scopes:        token,
+	}
+
+	if err := s.repoAccessToken.Create(authToken); err != nil {
+		return nil, err
+	}
+
+	return &dto.AuthDto{
+		Token:     token,
+		ExpiresIn: 2,
+	}, nil
 }
 
 func (s *authService) Attempt(dto dto.LoginDto) (*entity.User, error) {

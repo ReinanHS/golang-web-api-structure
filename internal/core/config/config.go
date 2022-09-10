@@ -16,6 +16,9 @@ type AppConfig struct {
 	DBDatabase   string `mapstructure:"DB_DATABASE"`
 	DBUsername   string `mapstructure:"DB_USERNAME"`
 	DBPassword   string `mapstructure:"DB_PASSWORD"`
+
+	JwtSecret    string `mapstructure:"JWT_SECRET"`
+	JwtExpiresIn int    `mapstructure:"JWT_EXPIRES_IN"`
 }
 
 var lock = &sync.Mutex{}

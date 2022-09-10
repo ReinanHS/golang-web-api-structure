@@ -45,7 +45,7 @@ func (c authenticatedSessionController) Store(context *gin.Context) {
 		return
 	}
 
-	authToken, err := c.authService.Auth(context, params)
+	authDto, err := c.authService.Auth(context, params)
 	if err != nil {
 		request.ResponseDTO{
 			Message: err.Error(),
@@ -54,8 +54,11 @@ func (c authenticatedSessionController) Store(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"data": authToken,
-		"ip":   context.ClientIP(),
+	context.JSON(http.StatusOK, request.ResponseDataDto{
+		ResponseDTO: request.ResponseDTO{
+			Message: "autenticação feita com sucesso",
+			Code:    http.StatusOK,
+		},
+		Data: authDto,
 	})
 }
