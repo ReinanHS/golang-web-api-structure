@@ -62,7 +62,7 @@ func (c registeredUserController) Store(context *gin.Context) {
 		return
 	}
 
-	authSession, err := c.authService.GetAuthSession(context, &user)
+	authSession, err := c.authService.GetAuthSession(context, user)
 	if err != nil {
 		request.ResponseDTO{
 			Message: err.Error(),
@@ -71,6 +71,7 @@ func (c registeredUserController) Store(context *gin.Context) {
 		return
 	}
 
+	authSession.IsActive = true
 	_, err = c.authSessionRepo.Create(authSession)
 	if err != nil {
 		request.ResponseDTO{

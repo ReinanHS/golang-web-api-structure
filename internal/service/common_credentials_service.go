@@ -50,8 +50,8 @@ func (s *commonCredentialsService) ValidPasswordsCommonCredentials(pass string) 
 	result := strings.Contains(string(body), pass)
 
 	if result {
-		return result, errors.New(errorInvalidPassword)
+		return false, errors.New(errorInvalidPassword)
 	}
 
-	return result, nil
+	return true, nil
 }

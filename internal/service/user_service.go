@@ -17,7 +17,7 @@ var (
 )
 
 type UserService interface {
-	Store(dto dto.RegisterDto) (entity.User, error)
+	Store(dto dto.RegisterDto) (*entity.User, error)
 }
 
 type userService struct {
@@ -35,26 +35,26 @@ func NewUserService(ctx context.Context) UserService {
 	}
 }
 
-func (s *userService) Store(dto dto.RegisterDto) (entity.User, error) {
+func (s *userService) Store(dto dto.RegisterDto) (*entity.User, error) {
 	if s.repository.EmailIsInUsed(dto.Email) {
-		return entity.User{}, errors.New(errorInvalidEmail)
+		return nil, errors.New(errorInvalidEmail)
 	}
 
 	if s.repository.UsernameIsInUsed(dto.Username) {
-		return entity.User{}, errors.New(errorInvalidUsername)
+		return nil, errors.New(errorInvalidUsername)
 	}
 
 	isValidPassword, err := s.credentialsService.ValidPasswordsCommonCredentials(dto.Password)
 	if err != nil || !isValidPassword {
-		return entity.User{}, err
+		return nil, err
 	}
 
 	generateFromPassword, err := helper.GenerateFromPassword(dto.Password, helper.GetParams())
 	if err != nil {
-		return entity.User{}, err
+		return nil, err
 	}
 
-	user := entity.User{
+	user := &entity.User{
 		Username: dto.Username,
 		Name:     dto.Name,
 		Avatar: gravatar.New(dto.Email).
@@ -65,8 +65,8 @@ func (s *userService) Store(dto dto.RegisterDto) (entity.User, error) {
 		Email:    dto.Email,
 	}
 
-	if err := s.repository.Store(&user); err != nil {
-		return entity.User{}, errors.New(err.Error())
+	if err := s.repository.Store(user); err != nil {
+		return nil, errors.New(err.Error())
 	}
 
 	return user, nil
