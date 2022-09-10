@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/reinanhs/golang-web-api-structure/internal/entity"
+	"github.com/reinanhs/golang-web-api-structure/pkg/entity"
 	"gorm.io/gorm"
 )
 

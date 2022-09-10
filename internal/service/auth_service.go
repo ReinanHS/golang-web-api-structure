@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mileusna/useragent"
-	"github.com/reinanhs/golang-web-api-structure/internal/dto"
-	"github.com/reinanhs/golang-web-api-structure/internal/entity"
 	"github.com/reinanhs/golang-web-api-structure/internal/helper"
 	"github.com/reinanhs/golang-web-api-structure/internal/repository"
+	"github.com/reinanhs/golang-web-api-structure/pkg/dto"
+	"github.com/reinanhs/golang-web-api-structure/pkg/entity"
 )
 
 var (

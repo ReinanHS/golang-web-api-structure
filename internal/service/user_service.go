@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/drexedam/gravatar"
-	"github.com/reinanhs/golang-web-api-structure/internal/dto"
-	"github.com/reinanhs/golang-web-api-structure/internal/entity"
 	"github.com/reinanhs/golang-web-api-structure/internal/helper"
 	"github.com/reinanhs/golang-web-api-structure/internal/repository"
+	"github.com/reinanhs/golang-web-api-structure/pkg/dto"
+	"github.com/reinanhs/golang-web-api-structure/pkg/entity"
 )
 
 var (
@@ -26,7 +26,7 @@ type userService struct {
 	ctx                context.Context
 }
 
-//NewUserService is creates a new instance of UserService
+//NewUserService is creates a new instance of JWTService
 func NewUserService(ctx context.Context) UserService {
 	return &userService{
 		repository:         repository.NewUserRepository(ctx),

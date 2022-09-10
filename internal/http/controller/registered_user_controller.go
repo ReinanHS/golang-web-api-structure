@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/reinanhs/golang-web-api-structure/internal/core/request"
-	"github.com/reinanhs/golang-web-api-structure/internal/dto"
 	"github.com/reinanhs/golang-web-api-structure/internal/repository"
 	"github.com/reinanhs/golang-web-api-structure/internal/service"
+	"github.com/reinanhs/golang-web-api-structure/pkg/dto"
 	"net/http"
 )
 
