@@ -23,7 +23,7 @@ type AuthService interface {
 	AttemptSession(authSession *entity.AuthSession) (bool, error)
 	CheckSession(context *gin.Context, user *entity.User) (bool, error)
 	GetAuthSession(context *gin.Context, user *entity.User) (*entity.AuthSession, error)
-	Auth(context *gin.Context, dto dto.LoginDto) (*dto.AuthDto, error)
+	Auth(context *gin.Context, dto dto.LoginDto) (*dto.AuthTokenDto, error)
 }
 
 type authService struct {
@@ -46,7 +46,7 @@ func NewAuthService(ctx context.Context) AuthService {
 	}
 }
 
-func (s *authService) Auth(context *gin.Context, dtoLogin dto.LoginDto) (*dto.AuthDto, error) {
+func (s *authService) Auth(context *gin.Context, dtoLogin dto.LoginDto) (*dto.AuthTokenDto, error) {
 	user, err := s.Attempt(dtoLogin)
 	if err != nil {
 		session, _ := s.GetAuthSession(context, user)
@@ -83,7 +83,7 @@ func (s *authService) Auth(context *gin.Context, dtoLogin dto.LoginDto) (*dto.Au
 		return nil, err
 	}
 
-	return &dto.AuthDto{
+	return &dto.AuthTokenDto{
 		Token:     token,
 		ExpiresIn: 2,
 	}, nil

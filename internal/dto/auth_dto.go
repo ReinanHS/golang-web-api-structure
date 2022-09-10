@@ -1,8 +1,9 @@
 package dto
 
-import "time"
-
 type AuthDto struct {
-	Token     string        `json:"token"`
-	ExpiresIn time.Duration `json:"expires_in"`
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Avatar   string `json:"avatar"`
+	Email    string `json:"email"`
 }

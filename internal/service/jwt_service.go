@@ -81,7 +81,7 @@ func (s *jwtService) GetIDFromToken(t string) (int64, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		id := claims["sum"].(string)
+		id := fmt.Sprintf("%v", claims["sum"])
 		val, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {
 			return 0, err

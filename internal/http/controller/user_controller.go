@@ -9,6 +9,7 @@ import (
 //UserController is a ....
 type UserController interface {
 	Index(context *gin.Context)
+	Me(context *gin.Context)
 }
 
 type userController struct {
@@ -28,5 +29,12 @@ func (c userController) Index(context *gin.Context) {
 
 	context.JSON(200, gin.H{
 		"data": users,
+	})
+}
+
+func (c userController) Me(context *gin.Context) {
+	auth := context.Request.Context().Value("auth")
+	context.JSON(200, gin.H{
+		"data": auth,
 	})
 }
